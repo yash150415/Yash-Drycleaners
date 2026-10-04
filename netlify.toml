@@ -1,0 +1,19 @@
+# Netlify deployment configuration — Yash Dry Cleaners
+# Deploy: `npm install && npm run build`, or connect the repo and Netlify
+# auto-detects these settings.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback — every route serves the app (works with direct page refreshes)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Long-cache static business imagery (immutable between deploys)
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
