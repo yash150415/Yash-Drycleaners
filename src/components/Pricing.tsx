@@ -2,8 +2,16 @@ import { useMemo, useState } from "react";
 import { Check, Info, Minus, Plus, ReceiptText, RotateCcw, Send, Sparkles } from "lucide-react";
 import { Img } from "@/components/Img";
 import type { Estimate, EstimateLine } from "@/lib/bookingBus";
+import type { PriceItem } from "@/lib/business";
 import { clearEstimate, scrollToSection, setEstimate as publishEstimate } from "@/lib/bookingBus";
-import { BUSINESS, PRICE_CATEGORIES, PRICE_ITEMS, priceLabel, whatsappHref } from "@/lib/business";
+import {
+  BUSINESS,
+  PRICE_CATEGORIES,
+  PRICE_ITEMS,
+  itemRate,
+  priceLabel,
+  whatsappHref,
+} from "@/lib/business";
 
 function Stepper({
   value,
@@ -38,6 +46,12 @@ function Stepper({
   );
 }
 
+/** "₹50" for the cheapest rated line in a category, or "quote". */
+function cheapestLabel(items: PriceItem[]): string {
+  const rates = items.map((item) => itemRate(item)).filter((rate): rate is number => rate != null);
+  return rates.length === 0 ? "quote" : `₹${Math.min(...rates)}`;
+}
+
 export function Pricing() {
   const [activeCategory, setActiveCategory] = useState(PRICE_CATEGORIES[0].id);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -54,12 +68,12 @@ export function Pricing() {
   };
 
   const estimate: Estimate = useMemo(() => {
-    const lines: EstimateLine[] = PRICE_ITEMS.filter((item) => item.price != null && quantities[item.id]).map(
+    const lines: EstimateLine[] = PRICE_ITEMS.filter((item) => itemRate(item) != null && quantities[item.id]).map(
       (item) => ({
         id: item.id,
         name: item.name,
         qty: quantities[item.id],
-        rate: item.price as number,
+        rate: itemRate(item) as number,
         unit: item.unit,
       }),
     );
@@ -68,7 +82,8 @@ export function Pricing() {
     return { lines, total, quoteOnly, createdAt: Date.now() };
   }, [quantities]);
 
-  const itemCount = estimate.lines.reduce((sum, line) => sum + line.qty, 0);
+  const itemCount = estimate.lines.reduce((sum, line) => sum + line.qty, 0) + estimate.quoteOnly.length;
+  const ratedCount = estimate.lines.reduce((sum, line) => sum + line.qty, 0);
   const freeDeliveryGap = Math.max(0, BUSINESS.freePickupAbove - estimate.total);
 
   const estimateMessage = [
@@ -93,11 +108,12 @@ export function Pricing() {
       <div className="wrap">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <span className="eyebrow">Real price list</span>
-            <h2 className="h2 mt-4">Printed rates, no weekend surcharge.</h2>
+            <span className="eyebrow">Complete price list</span>
+            <h2 className="h2 mt-4">The rate card from our counter, with photos.</h2>
             <p className="lede mt-4">
-              These are the rates on the board at the shop counter. Weigh-based laundry starts at ₹60 per kg, and anything
-              that needs a closer look is quoted honestly before cleaning — never after.
+              Men's wear, women's wear and household care — every rate below is the one printed at the shop, and every
+              photo is a garment we actually clean. Items marked “starting ₹…” are confirmed after we see the fabric and
+              the work on it.
             </p>
           </div>
           <a href="#estimator" className="btn-outline">
@@ -106,8 +122,9 @@ export function Pricing() {
           </a>
         </div>
 
-        <div className="mt-9 grid gap-6 lg:grid-cols-[15rem_1fr]">
-          <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+        <div className="mt-9 grid gap-6 lg:grid-cols-[16rem_1fr] lg:items-start">
+          {/* ------------------------------------------------ category rail */}
+          <div className="flex gap-3 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
             {PRICE_CATEGORIES.map((entry) => {
               const active = entry.id === category.id;
               return (
@@ -116,37 +133,81 @@ export function Pricing() {
                   type="button"
                   onClick={() => setActiveCategory(entry.id)}
                   aria-pressed={active}
-                  className={`shrink-0 rounded-2xl border px-4 py-3 text-left transition lg:w-full ${
+                  className={`group flex shrink-0 items-center gap-3 rounded-2xl border p-2 pr-4 text-left transition lg:w-full ${
                     active
-                      ? "border-teal-deep bg-teal/12 text-teal-deep shadow-soft"
-                      : "border-line bg-paper text-ink-soft hover:border-teal/50"
+                      ? "border-teal-deep bg-teal/12 shadow-soft"
+                      : "border-line bg-paper hover:border-teal/50"
                   }`}
                 >
-                  <span className="block whitespace-nowrap text-[13.5px] font-semibold lg:whitespace-normal">
-                    {entry.title}
+                  <Img
+                    slot={entry.slot}
+                    alt=""
+                    ratio="aspect-square"
+                    className={`h-12 w-12 shrink-0 rounded-xl border ${
+                      active ? "border-teal-deep/40" : "border-line"
+                    }`}
+                    imgClassName="transition duration-500 group-hover:scale-105"
+                  />
+                  <span className="min-w-0">
+                    <span
+                      className={`block whitespace-nowrap text-[13.5px] font-semibold lg:whitespace-normal ${
+                        active ? "text-teal-deep" : "text-ink"
+                      }`}
+                    >
+                      {entry.title}
+                    </span>
+                    <span className="mt-0.5 block text-[11.5px] text-muted">
+                      {entry.items.length} items · from {cheapestLabel(entry.items)}
+                    </span>
                   </span>
-                  <span className="mt-0.5 block text-[11.5px] text-muted">{entry.items.length} items</span>
                 </button>
               );
             })}
+
+            <div className="hidden rounded-2xl border border-dashed border-line bg-cream/60 p-4 lg:block">
+              <p className="text-[12.5px] font-semibold text-ink">Free pickup &amp; delivery</p>
+              <p className="mt-1 text-[12px] leading-relaxed text-muted">
+                On orders above ₹{BUSINESS.freePickupAbove} anywhere in our Bhavnagar area. Below that, a ₹30 trip
+                charge.
+              </p>
+            </div>
           </div>
 
+          {/* -------------------------------------------------- price card */}
           <div className="card overflow-hidden">
-            <div className="grid gap-0 md:grid-cols-[0.85fr_1.15fr]">
-              <div className="flex flex-col border-b border-line md:border-b-0 md:border-r">
+            <div className="grid gap-0 md:grid-cols-[0.9fr_1.1fr]">
+              <div className="border-b border-line md:border-b-0 md:border-r">
                 <Img
                   slot={category.slot}
-                  alt={`${category.title} at Yash Dry Cleaners`}
+                  alt={`${category.title} at Yash Dry Cleaners, Bhavnagar`}
                   ratio="aspect-[4/3]"
-                  className="shrink-0 md:aspect-auto md:min-h-[15rem] md:flex-1"
+                  className="md:aspect-[4/3]"
+                  imgClassName="transition duration-700 hover:scale-[1.04]"
                 />
+
                 <div className="p-5">
-                  <p className="text-[13.5px] leading-relaxed text-muted">{category.blurb}</p>
+                  <h3 className="font-display text-2xl leading-tight text-ink">{category.title}</h3>
+                  <p className="mt-2 text-[13.5px] leading-relaxed text-muted">{category.blurb}</p>
+
                   {category.note && (
                     <p className="mt-3 inline-flex gap-2 rounded-2xl bg-cream p-3 text-[12.5px] leading-relaxed text-ink-soft">
                       <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-deep" aria-hidden="true" />
                       {category.note}
                     </p>
+                  )}
+
+                  {category.gallery && category.gallery.length > 0 && (
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      {category.gallery.map((slot) => (
+                        <Img
+                          key={slot}
+                          slot={slot}
+                          alt={`${category.title} — ${slot.replace(/-/g, " ")} at the shop`}
+                          ratio="aspect-square"
+                          className="rounded-xl border border-line"
+                        />
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>
@@ -155,17 +216,23 @@ export function Pricing() {
                 {category.items.map((item) => (
                   <li
                     key={item.id}
-                    className="flex items-center justify-between gap-4 px-5 py-3.5 transition hover:bg-cream/70"
+                    className="flex items-center gap-3.5 px-4 py-3 transition hover:bg-cream/70 sm:px-5"
                   >
-                    <span>
+                    <Img
+                      slot={item.slot ?? category.slot}
+                      alt={item.name}
+                      ratio="aspect-square"
+                      className="h-14 w-14 shrink-0 rounded-xl border border-line"
+                    />
+                    <span className="min-w-0 flex-1">
                       <span className="block text-[14px] font-medium text-ink">{item.name}</span>
-                      {item.quote ? (
-                        <span className="text-[12px] text-muted">{item.note ?? "Priced after inspection"}</span>
-                      ) : null}
+                      {item.note && (
+                        <span className="mt-0.5 block text-[11.5px] leading-snug text-muted">{item.note}</span>
+                      )}
                     </span>
                     <span
                       className={`shrink-0 rounded-full px-3 py-1 text-[12.5px] font-semibold ${
-                        item.quote ? "bg-gold/15 text-ink" : "bg-teal/12 text-teal-deep"
+                        item.quote ? "bg-gold/15 text-ink" : item.from != null ? "bg-cream text-ink" : "bg-teal/12 text-teal-deep"
                       }`}
                     >
                       {priceLabel(item)}
@@ -174,6 +241,11 @@ export function Pricing() {
                 ))}
               </ul>
             </div>
+
+            <p className="border-t border-line bg-cream/60 px-5 py-3 text-[12px] leading-relaxed text-muted">
+              Rates as printed at the shop counter. Heavy or designer pieces are confirmed after inspection — you are
+              always told the final price before we start cleaning.
+            </p>
           </div>
         </div>
 
@@ -186,8 +258,8 @@ export function Pricing() {
             </span>
             <h3 className="h2 mt-4">Build your ticket before we pick up.</h3>
             <p className="lede mt-4">
-              Tap quantities for a running total, then send the whole ticket into the booking form — we get the same list on
-              WhatsApp.
+              Tap quantities for a running total — “starting” rates are used as the base — then send the whole ticket
+              into the booking form. We get the same list on WhatsApp.
             </p>
           </div>
 
@@ -196,9 +268,17 @@ export function Pricing() {
               {PRICE_CATEGORIES.map((entry, index) => (
                 <details key={entry.id} open={index === 0} className="group">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4">
-                    <span>
-                      <span className="block font-display text-lg text-ink">{entry.title}</span>
-                      <span className="text-[12.5px] text-muted">{entry.blurb}</span>
+                    <span className="flex min-w-0 items-center gap-3">
+                      <Img
+                        slot={entry.slot}
+                        alt=""
+                        ratio="aspect-square"
+                        className="h-11 w-11 shrink-0 rounded-xl border border-line"
+                      />
+                      <span className="min-w-0">
+                        <span className="block font-display text-lg text-ink">{entry.title}</span>
+                        <span className="text-[12.5px] text-muted">{entry.items.length} items · {entry.blurb}</span>
+                      </span>
                     </span>
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line text-teal-deep transition group-open:rotate-45">
                       <Plus className="h-4 w-4" aria-hidden="true" />
@@ -211,18 +291,24 @@ export function Pricing() {
                         key={item.id}
                         className="flex items-center justify-between gap-3 border-t border-dashed border-line py-3 first:border-t-0"
                       >
-                        <span className="min-w-0">
-                          <span className="block truncate text-[14px] font-medium text-ink">{item.name}</span>
-                          <span className="text-[12px] text-muted">
-                            {item.quote ? "Ask for quote" : priceLabel(item)}
+                        <span className="flex min-w-0 items-center gap-3">
+                          <Img
+                            slot={item.slot ?? entry.slot}
+                            alt=""
+                            ratio="aspect-square"
+                            className="h-10 w-10 shrink-0 rounded-lg border border-line"
+                          />
+                          <span className="min-w-0">
+                            <span className="block truncate text-[14px] font-medium text-ink">{item.name}</span>
+                            <span className="text-[12px] text-muted">
+                              {item.quote ? "Ask for quote" : priceLabel(item)}
+                            </span>
                           </span>
                         </span>
                         {item.quote ? (
                           <button
                             type="button"
-                            onClick={() =>
-                              setQuantity(item.id, quantities[item.id] ? 0 : 1)
-                            }
+                            onClick={() => setQuantity(item.id, quantities[item.id] ? 0 : 1)}
                             className={`shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${
                               quantities[item.id]
                                 ? "bg-teal/15 text-teal-deep"
@@ -290,12 +376,16 @@ export function Pricing() {
                 <div className="my-4 border-t border-dashed border-line" />
 
                 <div className="flex items-end justify-between">
-                  <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-muted">Estimated total</span>
+                  <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-muted">
+                    Estimated total
+                  </span>
                   <span className="font-display text-3xl leading-none text-ink">₹{estimate.total}</span>
                 </div>
 
                 <p className="mt-3 text-[12px] leading-relaxed text-muted">
-                  Estimate only — the final bill is confirmed at intake. Rate card valid at the shop counter.
+                  {ratedCount > 0
+                    ? "Based on the starting rates on the card — the final bill is confirmed at intake."
+                    : "Estimate only — the final bill is confirmed at intake. Rate card valid at the shop counter."}
                 </p>
 
                 {itemCount > 0 && (
@@ -314,7 +404,7 @@ export function Pricing() {
                   <button
                     type="button"
                     className="btn-primary w-full"
-                    disabled={itemCount === 0 && estimate.quoteOnly.length === 0}
+                    disabled={itemCount === 0}
                     onClick={sendToBooking}
                   >
                     <Send className="h-4 w-4" aria-hidden="true" />
@@ -331,7 +421,7 @@ export function Pricing() {
                   <button
                     type="button"
                     className="btn-outline w-full"
-                    disabled={itemCount === 0 && estimate.quoteOnly.length === 0}
+                    disabled={itemCount === 0}
                     onClick={() => {
                       setQuantities({});
                       clearEstimate();
@@ -344,8 +434,8 @@ export function Pricing() {
 
                 <p className="mt-4 flex items-start gap-2 text-[12px] leading-relaxed text-muted">
                   <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-deep" aria-hidden="true" />
-                  Heavier fabrics like quilts and carpets are charged after measuring — we will confirm the weight on
-                  pickup.
+                  Sarees, lehengas and embroidered wear are photographed before cleaning and the exact rate is confirmed
+                  with you first.
                 </p>
               </div>
             </div>

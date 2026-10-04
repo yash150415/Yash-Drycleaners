@@ -145,7 +145,8 @@ export type Service = {
   blurb: string;
   /** image slot — see src/lib/images.ts */
   slot: string;
-  from: number;
+  /** starting rate from the counter price list — omit when the service is quoted per job */
+  from?: number;
   turnaround: string;
   highlights: string[];
 };
@@ -157,7 +158,7 @@ export const SERVICES: Service[] = [
     blurb:
       "Solvent cleaning for suits, woollens and delicate fabrics — colour-safe, shape-safe, finished with a careful press.",
     slot: "dry-cleaning",
-    from: 80,
+    from: 50,
     turnaround: "48 hours",
     highlights: ["Stain pre-treatment", "pH-neutral solvent", "Hand-finished press"],
   },
@@ -167,7 +168,7 @@ export const SERVICES: Service[] = [
     blurb:
       "Everyday laundry washed in soft water, tumble-dried and folded into tidy stacks with a paper band.",
     slot: "wash-fold",
-    from: 60,
+    from: 50,
     turnaround: "24–48 hours",
     highlights: ["Separate wash loads", "Skin-safe detergent", "Neat folded stacks"],
   },
@@ -177,9 +178,9 @@ export const SERVICES: Service[] = [
     blurb:
       "Full wash plus crisp steam pressing, delivered on hangers or folded — ready to wear straight from the bag.",
     slot: "shirt",
-    from: 80,
+    from: 50,
     turnaround: "48 hours",
-    highlights: ["Sharp collar & crease", "Hanger or fold", "Per kg pricing"],
+    highlights: ["Sharp collar & crease", "Hanger or fold", "Priced per piece"],
   },
   {
     id: "steam-press",
@@ -187,9 +188,8 @@ export const SERVICES: Service[] = [
     blurb:
       "Heavy-duty steam ironing that lifts creases out of cotton, linen and silk without burning the weave.",
     slot: "steam-press",
-    from: 15,
     turnaround: "Same day",
-    highlights: ["No shine marks", "Same-day option", "Per piece"],
+    highlights: ["No shine marks", "Same-day option", "Priced per piece"],
   },
   {
     id: "saree-care",
@@ -207,7 +207,7 @@ export const SERVICES: Service[] = [
     blurb:
       "Two-piece suits, blazers and waistcoats cleaned with structure in mind, then pressed on shaped formers.",
     slot: "suit",
-    from: 90,
+    from: 150,
     turnaround: "48 hours",
     highlights: ["Shape-preserving press", "Lining inspected", "Buttons protected"],
   },
@@ -217,7 +217,7 @@ export const SERVICES: Service[] = [
     blurb:
       "Winter quilts, razai and woollen blankets deep-cleaned, sanitised and fluffed — dust, mites and odour gone.",
     slot: "blanket",
-    from: 200,
+    from: 250,
     turnaround: "3–4 days",
     highlights: ["Anti-dust mite wash", "Soft finish", "Odour removal"],
   },
@@ -227,7 +227,6 @@ export const SERVICES: Service[] = [
     blurb:
       "Heavy drapes and sheers cleaned panel by panel, steamed and returned ready to re-hang without shrinkage shocks.",
     slot: "curtain",
-    from: 120,
     turnaround: "4–5 days",
     highlights: ["Take-down advice", "Panel-wise billing", "Steam finished"],
   },
@@ -237,9 +236,8 @@ export const SERVICES: Service[] = [
     blurb:
       "Deep extraction for rugs and carpets — colour-locked, deodorised and dried flat before delivery.",
     slot: "carpet",
-    from: 15,
     turnaround: "3–5 days",
-    highlights: ["Deep extraction", "Colour-lock test first", "Per sq ft"],
+    highlights: ["Deep extraction", "Colour-lock test first", "Quoted on inspection"],
   },
   {
     id: "trouser-shirt",
@@ -258,14 +256,16 @@ export const SERVICES: Service[] = [
 export type PriceItem = {
   id: string;
   name: string;
-  /** numeric rate used by the estimator */
+  /** numeric rate used by the estimator (a straight, per-piece rate) */
   price?: number;
-  /** display "from" price when it isn't a straight per-piece rate */
+  /** "Starting ₹…" rate — the estimator uses it as the base estimate */
   from?: number;
-  /** quote-only item */
+  /** quote-only item, priced after inspection */
   quote?: boolean;
   unit?: string;
   note?: string;
+  /** photo from the project-root `images/` folder — see src/lib/images.ts */
+  slot?: string;
 };
 
 export type PriceCategory = {
@@ -274,95 +274,227 @@ export type PriceCategory = {
   blurb: string;
   slot: string;
   note?: string;
+  /** extra photos from `images/` used for the category photo strip */
+  gallery?: string[];
   items: PriceItem[];
 };
 
+/**
+ * The rate card exactly as printed at the shop counter: Men's Wear, Women's
+ * Wear and Household & Home Care. Every line points at a photo in the
+ * project-root `images/` folder through its `slot`, so replacing a photo there
+ * updates the price cards too — no code changes.
+ */
 export const PRICE_CATEGORIES: PriceCategory[] = [
-  {
-    id: "everyday",
-    title: "Everyday Laundry",
-    blurb: "Wash, dry, fold and press — billed by weight or per piece.",
-    slot: "wash-fold",
-    note: "Minimum 3 kg for weigh-based orders.",
-    items: [
-      { id: "wf", name: "Wash & Fold", price: 60, unit: "per kg" },
-      { id: "wi", name: "Wash & Iron", price: 80, unit: "per kg" },
-      { id: "press", name: "Steam press only", price: 15, unit: "per piece" },
-      { id: "shirt-wash", name: "Shirt (wash + press)", price: 50, unit: "per piece" },
-      { id: "trouser-wash", name: "Trouser (wash + press)", price: 55, unit: "per piece" },
-      { id: "bedsheet-s", name: "Bed sheet (single)", price: 80, unit: "per piece" },
-      { id: "bedsheet-d", name: "Bed sheet (double)", price: 110, unit: "per piece" },
-      { id: "pillow", name: "Pillow cover", price: 25, unit: "per piece" },
-    ],
-  },
   {
     id: "menswear",
     title: "Men's Wear",
-    blurb: "Dry cleaning with a structured press, delivered on hangers.",
+    blurb: "Dry cleaned and steam pressed piece by piece, returned on hangers.",
     slot: "suit",
+    gallery: ["shirt", "trouser", "steam-press"],
+    note: "Shirt and pant rates are per piece; the suit rate is for the full 2-piece set.",
     items: [
-      { id: "shirt-dc", name: "Shirt", price: 80, unit: "per piece" },
-      { id: "trouser-dc", name: "Trouser", price: 90, unit: "per piece" },
-      { id: "blazer", name: "Blazer / Coat", price: 160, unit: "per piece" },
-      { id: "suit-2pc", name: "Suit (2 piece)", price: 240, unit: "per set" },
-      { id: "waistcoat", name: "Waistcoat", price: 90, unit: "per piece" },
-      { id: "kurta-pyjama", name: "Kurta Pyjama", price: 140, unit: "per set" },
-      { id: "sherwani", name: "Sherwani", quote: true, note: "Depends on work & fabric" },
+      {
+        id: "shirt-dc",
+        name: "Shirt",
+        price: 50,
+        unit: "per piece",
+        note: "Washed or dry cleaned, collar & cuff detailed",
+        slot: "shirt",
+      },
+      { id: "tshirt", name: "T-Shirt", price: 50, unit: "per piece", note: "Gentle cycle, print-safe", slot: "wash-fold" },
+      {
+        id: "trouser-dc",
+        name: "Pant / Trouser",
+        price: 50,
+        unit: "per piece",
+        note: "Sharp front crease, pockets checked",
+        slot: "trouser",
+      },
+      {
+        id: "pant-shirt",
+        name: "Pant + Shirt",
+        price: 60,
+        unit: "per set",
+        note: "Combo rate for one pant and one shirt",
+        slot: "steam-press",
+      },
+      {
+        id: "suit-2pc",
+        name: "Suit (2 piece)",
+        price: 150,
+        unit: "per set",
+        note: "Coat and trouser, pressed on shaped formers",
+        slot: "suit",
+      },
+      {
+        id: "sherwani",
+        name: "Sherwani",
+        price: 200,
+        unit: "per piece",
+        note: "Final rate depends on embroidery work & fabric",
+        slot: "dry-cleaning",
+      },
     ],
   },
   {
     id: "womenswear",
     title: "Women's Wear",
-    blurb: "Gentle cycles and hand finishing for everyday and festive wear.",
+    blurb: "Sarees, suits and festive wear cleaned by hand and roll-folded.",
     slot: "saree-care",
+    gallery: ["dry-cleaning", "packaging", "interior"],
+    note: "Most women's rates are a starting price — we confirm the exact amount after seeing the fabric and the work on it.",
     items: [
-      { id: "saree-plain", name: "Saree (plain)", price: 150, unit: "per piece" },
-      { id: "salwar", name: "Salwar Suit", price: 180, unit: "per set" },
-      { id: "blouse", name: "Blouse", price: 50, unit: "per piece" },
-      { id: "dupatta", name: "Dupatta / Stole", price: 70, unit: "per piece" },
-      { id: "dress", name: "Dress / Gown", price: 200, unit: "per piece" },
-      { id: "saree-designer", name: "Saree (designer / heavy work)", quote: true, note: "Inspected first, then quoted" },
-      { id: "lehenga", name: "Lehenga", quote: true, note: "Quoted after seeing the work" },
+      {
+        id: "saree",
+        name: "Saree",
+        from: 150,
+        unit: "per piece",
+        note: "Starting ₹150 — varies by fabric",
+        slot: "saree-care",
+      },
+      {
+        id: "silk-saree",
+        name: "Silk Saree",
+        from: 250,
+        unit: "per piece",
+        note: "Premium fabric care — zari and border protected",
+        slot: "saree-care",
+      },
+      {
+        id: "lehenga",
+        name: "Lehenga",
+        from: 250,
+        unit: "per piece",
+        note: "Starting ₹250 — varies by design and fabric",
+        slot: "packaging",
+      },
+      {
+        id: "kurtis",
+        name: "Kurtis",
+        from: 120,
+        unit: "per piece",
+        note: "Starting ₹120 — varies by fabric and embroidery",
+        slot: "wash-fold",
+      },
+      {
+        id: "salwar-suit",
+        name: "Salwar Suit",
+        from: 180,
+        unit: "per set",
+        note: "Starting ₹180 — varies by fabric and work",
+        slot: "dry-cleaning",
+      },
+      {
+        id: "chiffon-georgette",
+        name: "Chiffon & Georgette Wear",
+        price: 200,
+        unit: "per piece",
+        note: "Delicate fabric care, hand finished",
+        slot: "saree-care",
+      },
+      {
+        id: "embroidered-wear",
+        name: "Embroidered Wear",
+        price: 200,
+        unit: "per piece",
+        note: "₹200 — price varies by embroidery work",
+        slot: "packaging",
+      },
+      {
+        id: "designer-dress",
+        name: "Designer Dress",
+        from: 250,
+        unit: "per piece",
+        note: "Starting ₹250 — varies by design",
+        slot: "dry-cleaning",
+      },
+      {
+        id: "dupatta",
+        name: "Dupatta",
+        from: 80,
+        unit: "per piece",
+        note: "Starting ₹80 — varies by fabric",
+        slot: "saree-care",
+      },
+      {
+        id: "blouse",
+        name: "Blouse",
+        from: 100,
+        unit: "per piece",
+        note: "Starting ₹100 — varies by design",
+        slot: "saree-care",
+      },
     ],
   },
   {
-    id: "home",
-    title: "Home & Bedding",
-    blurb: "Blankets, curtains and carpets — measured, cleaned and dried flat.",
+    id: "household",
+    title: "Household & Home Care",
+    blurb: "Blankets, razai, curtains and carpets — measured, cleaned and dried flat.",
     slot: "blanket",
+    gallery: ["curtain", "carpet", "pickup-delivery"],
+    note: "Curtains and carpets are quoted after we see the fabric, size and soil level.",
     items: [
-      { id: "blanket-s", name: "Blanket (single)", price: 200, unit: "per piece" },
-      { id: "quilt-d", name: "Quilt / Razai (double)", price: 250, unit: "per piece" },
-      { id: "curtain", name: "Curtain", price: 120, unit: "per panel" },
-      { id: "carpet", name: "Carpet", price: 15, unit: "per sq ft" },
-      { id: "sofa-cover", name: "Sofa cover", price: 80, unit: "per seat" },
-      { id: "cushion", name: "Cushion cover", price: 25, unit: "per piece" },
-    ],
-  },
-  {
-    id: "premium",
-    title: "Delicate & Premium",
-    blurb: "Wedding and heirloom pieces handled one garment at a time.",
-    slot: "dry-cleaning",
-    note: "Premium pieces are photographed before cleaning and stored on padded hangers.",
-    items: [
-      { id: "silk-saree", name: "Silk Saree", price: 220, unit: "per piece" },
-      { id: "wool-coat", name: "Woollen Coat", price: 220, unit: "per piece" },
-      { id: "sherwani-p", name: "Sherwani (heavy work)", quote: true },
-      { id: "lehenga-p", name: "Wedding Lehenga", quote: true },
-      { id: "zari", name: "Zari / embroidery work", quote: true },
+      {
+        id: "blanket",
+        name: "Blanket",
+        price: 250,
+        unit: "per piece",
+        note: "Deep cleaned, sanitised and fluffed",
+        slot: "blanket",
+      },
+      {
+        id: "quilt-razai",
+        name: "Quilt / Razai",
+        price: 250,
+        unit: "per piece",
+        note: "Anti-dust-mite wash, odour removal",
+        slot: "blanket",
+      },
+      {
+        id: "curtain",
+        name: "Curtain (per panel)",
+        quote: true,
+        note: "Starting price depends on requirements",
+        slot: "curtain",
+      },
+      {
+        id: "carpet",
+        name: "Carpet Cleaning",
+        quote: true,
+        note: "Confirm availability and get a quote",
+        slot: "carpet",
+      },
     ],
   },
 ];
 
 export const PRICE_ITEMS: PriceItem[] = PRICE_CATEGORIES.flatMap((c) => c.items);
 
+/** Items with a numeric rate — these are the ones the estimator can total. */
+export const PRICED_ITEMS: PriceItem[] = PRICE_ITEMS.filter((item) => item.price != null || item.from != null);
+
+/** Rate used by the estimator: the straight rate, else the "starting ₹…" rate. */
+export function itemRate(item: PriceItem): number | null {
+  if (item.price != null) return item.price;
+  if (item.from != null) return item.from;
+  return null;
+}
+
 export function priceLabel(item: PriceItem): string {
   if (item.quote) return "Ask for Quote";
-  if (item.unit && item.price != null) return `₹${item.price} ${item.unit}`;
+  const unit = item.unit ? ` ${item.unit}` : "";
+  if (item.price != null) return `₹${item.price}${unit}`;
+  if (item.from != null) return `from ₹${item.from}${unit}`;
+  return "Ask for Quote";
+}
+
+/** Short rate for tight spots like the estimator rows ("₹50" / "from ₹150"). */
+export function shortPriceLabel(item: PriceItem): string {
+  if (item.quote) return "Quote";
   if (item.price != null) return `₹${item.price}`;
   if (item.from != null) return `from ₹${item.from}`;
-  return "Ask for Quote";
+  return "Quote";
 }
 
 /* ------------------------------------------------------------ how it works */
@@ -458,6 +590,10 @@ export const FAQS: Faq[] = [
   {
     q: "How long does cleaning take?",
     a: `Standard turnaround is ${BUSINESS.turnaroundHours} hours. Everyday laundry is often back in 24 hours, and heavy items like quilts, curtains and carpets take 3–5 days. Same-day steam press is available if we receive the clothes before 11 AM.`,
+  },
+  {
+    q: "What does dry cleaning cost?",
+    a: "Shirts, t-shirts and pants are ₹50 each, a pant + shirt combo is ₹60, a 2-piece suit ₹150 and a sherwani ₹200. Sarees start at ₹150 (silk from ₹250), lehengas from ₹250, kurtis from ₹120, salwar suits from ₹180, dupattas from ₹80 and blouses from ₹100. Blankets and quilts are ₹250 each; curtains and carpets are quoted after we see them. Anything marked 'starting ₹…' is confirmed with you before cleaning.",
   },
   {
     q: "Will stains come out completely?",

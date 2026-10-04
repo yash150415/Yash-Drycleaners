@@ -131,8 +131,8 @@ export function Hero() {
 
             <div className="absolute bottom-4 right-2 w-[62%] max-w-[16rem] rounded-2xl border border-line bg-paper/95 p-3.5 shadow-lift backdrop-blur sm:bottom-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-teal-deep">Today at the shop</p>
-              <p className="mt-1 text-[13px] font-semibold text-ink">Wash &amp; Fold from ₹60/kg</p>
-              <p className="text-[12px] text-muted">Steam press ₹15 per piece · pickup free</p>
+              <p className="mt-1 text-[13px] font-semibold text-ink">Shirt ₹50 · Suit (2pc) ₹150</p>
+              <p className="text-[12px] text-muted">Saree from ₹150 · Blanket ₹250 · pickup free</p>
             </div>
           </div>
         </div>
