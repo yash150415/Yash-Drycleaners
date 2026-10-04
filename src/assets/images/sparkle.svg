@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Illustration of sparkling clean fabric">
+  <rect width="800" height="600" fill="#f6f4ee"/>
+  <path d="M400 150c60 60 92 104 92 152 0 52-41 92-92 92s-92-40-92-92c0-48 32-92 92-152z" fill="#cfe9e5" stroke="#0d1b24" stroke-width="6"/>
+  <circle cx="370" cy="330" r="20" fill="#3fc1b2" opacity="0.7"/>
+  <g fill="#c9a227">
+    <path d="M600 170l12 26 26 12-26 12-12 26-12-26-26-12 26-12z"/>
+    <path d="M210 200l9 20 20 9-20 9-9 20-9-20-20-9 20-9z"/>
+  </g>
+  <g stroke="#14776d" stroke-width="8" stroke-linecap="round" opacity="0.6">
+    <path d="M620 400l40 40M660 400l-40 40"/>
+  </g>
+</svg>

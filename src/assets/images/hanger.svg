@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Illustration of a garment on a hanger">
+  <rect width="800" height="600" fill="#f6f4ee"/>
+  <path d="M400 120c-24 0-42 16-42 38 0 14 8 26 20 32" fill="none" stroke="#0d1b24" stroke-width="12" stroke-linecap="round"/>
+  <path d="M400 190 210 300l48 66 62-38v182h160V328l62 38 48-66z" fill="#cfe9e5" stroke="#0d1b24" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M400 190v-18" stroke="#0d1b24" stroke-width="8" stroke-linecap="round"/>
+  <path d="M320 360h160" stroke="#14776d" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="400" cy="300" r="14" fill="#3fc1b2"/>
+</svg>

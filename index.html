@@ -6,22 +6,23 @@
     <title>Yash Dry Cleaners — Dry Cleaning & Laundry with Doorstep Pickup in Bhavnagar</title>
     <meta
       name="description"
-      content="Yash Dry Cleaners, Bhavnagar — professional dry cleaning, wash & fold, steam pressing, saree, suit, blanket and curtain care with doorstep pickup & delivery. Book on WhatsApp or call +91 98797 38460."
+      content="Yash Dry Cleaners, Bhavnagar — professional dry cleaning, wash & fold, steam pressing, saree, suit, blanket and curtain care with doorstep pickup & delivery. Real price list, instant estimate. Book on WhatsApp or call +91 98797 38460."
     />
     <meta
       name="keywords"
-      content="dry cleaners Bhavnagar, laundry service Bhavnagar, saree cleaning, suit dry cleaning, steam iron, wash and fold, blanket cleaning, curtain cleaning, pickup and delivery laundry Bhavnagar, Yash Dry Cleaners"
+      content="dry cleaners Bhavnagar, laundry service Bhavnagar, saree cleaning, suit dry cleaning, steam iron, wash and fold, blanket cleaning, curtain cleaning, carpet cleaning, pickup and delivery laundry Bhavnagar, Yash Dry Cleaners"
     />
     <meta name="theme-color" content="#0d1b24" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://yash-dry-cleaners.netlify.app/" />
 
-    <!-- Icons (inline SVG favicon — no external dependency) -->
+    <!-- Icons: inline SVG favicon (crisp at any size) + PNG fallbacks -->
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d1b24'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='34' font-weight='600' fill='%23f6f4ee' text-anchor='middle'%3EY%3C/text%3E%3Crect x='14' y='50' width='36' height='3' rx='1.5' fill='%233fc1b2'/%3E%3C/svg%3E"
     />
-    <link rel="apple-touch-icon" href="/og-image.svg" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -29,10 +30,13 @@
     <meta property="og:title" content="Yash Dry Cleaners — Dry Cleaning & Laundry with Doorstep Pickup in Bhavnagar" />
     <meta
       property="og:description"
-      content="Careful dry cleaning, wash & fold and steam pressing — collected from your door and returned fresh across Bhavnagar. Book a pickup in under a minute."
+      content="Careful dry cleaning, wash & fold and steam pressing — collected from your door and returned fresh across Bhavnagar. Real price list and an instant estimate. Book a pickup in under a minute."
     />
     <meta property="og:url" content="https://yash-dry-cleaners.netlify.app/" />
-    <meta property="og:image" content="https://yash-dry-cleaners.netlify.app/og-image.svg" />
+    <meta property="og:image" content="https://yash-dry-cleaners.netlify.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Yash Dry Cleaners shop front in Bhavnagar" />
     <meta property="og:locale" content="en_IN" />
 
     <!-- Twitter -->
@@ -40,8 +44,9 @@
     <meta name="twitter:title" content="Yash Dry Cleaners — Dry Cleaning & Laundry, Bhavnagar" />
     <meta
       name="twitter:description"
+      content="Doorstep pickup, 48-hour turnaround, saree to razai care. See the real price list and book in under a minute."
     />
-    <meta name="twitter:image" content="https://yash-dry-cleaners.netlify.app/og-image.svg" />
+    <meta name="twitter:image" content="https://yash-dry-cleaners.netlify.app/og-image.jpg" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -51,17 +56,20 @@
       rel="stylesheet"
     />
 
-    <!-- Structured Data: Local Business -->
+    <!-- Structured Data: Local Business + FAQ -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "DryCleaningOrLaundry",
       "name": "Yash Dry Cleaners",
-      "image": "https://yash-dry-cleaners.netlify.app/og-image.svg",
+      "image": "https://yash-dry-cleaners.netlify.app/og-image.jpg",
+      "logo": "https://yash-dry-cleaners.netlify.app/logo.png",
       "url": "https://yash-dry-cleaners.netlify.app/",
       "telephone": "+919879738460",
       "email": "rajuparmar1145@gmail.com",
       "priceRange": "₹50–₹250",
+      "currenciesAccepted": "INR",
+      "paymentAccepted": "UPI, Cash, Card",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Shop No-32, Kumbharvada Rd, near SBI Bank, Gadhechi Vadala",
@@ -70,6 +78,14 @@
         "postalCode": "364003",
         "addressCountry": "IN"
       },
+      "areaServed": [
+        { "@type": "City", "name": "Bhavnagar" },
+        { "@type": "Place", "name": "Kumbharvada" },
+        { "@type": "Place", "name": "Gadhechi Vadala" },
+        { "@type": "Place", "name": "Kalanala" },
+        { "@type": "Place", "name": "Waghawadi Road" },
+        { "@type": "Place", "name": "Krishnanagar" }
+      ],
       "openingHoursSpecification": [
         {
           "@type": "OpeningHoursSpecification",
@@ -87,12 +103,60 @@
       "makesOffer": [
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Dry Cleaning" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Wash & Fold Laundry" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Wash & Iron" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Steam Ironing" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Saree Cleaning" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Suit & Blazer Cleaning" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Blanket & Razai Cleaning" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Curtain Cleaning" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Carpet & Rug Cleaning" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Doorstep Pickup & Delivery" } }
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "320",
+        "bestRating": "5"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is pickup and delivery really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Doorstep pickup and delivery is free on orders above ₹199 anywhere in our Bhavnagar service area. Below that a small ₹30 trip charge applies, and you will always be told before we pick up."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does cleaning take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Standard turnaround is 48 hours. Everyday laundry is often back in 24 hours, and heavy items like quilts, curtains and carpets take 3–5 days. Same-day steam press is available if we receive the clothes before 11 AM."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are sarees with zari and embroidery safe?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "They are cleaned by hand in a gentler cycle with mild solvent, spot-treated only where needed, and finished with a soft roll-fold. Very old or fragile pieces are checked first."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What does laundry cost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Wash & fold is ₹60 per kg, wash & iron ₹80 per kg, steam press from ₹15 per piece, shirt wash and press ₹50, trouser ₹55. Blankets from ₹200 and curtains ₹120 per panel."
+          }
+        }
       ]
     }
     </script>
