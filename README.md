@@ -1,6 +1,6 @@
 # Yash Dry Cleaners — Bhavnagar
 
-Single-page marketing + booking site for a local dry-cleaning shop: ten services with photos, a drag-to-compare before/after, the real price list with an instant estimator, a gallery, reviews, FAQs, and a 4-step pickup booking flow that hands off to WhatsApp.
+Single-page marketing + booking site for a local dry-cleaning shop: ten services with photos, a drag-to-compare before/after, the real counter price list (photo card per garment + instant estimator), a gallery, reviews, FAQs, and a 4-step pickup booking flow that hands off to WhatsApp.
 
 **Stack:** React 19 · TypeScript · Vite 7 · Tailwind CSS 4 · lucide-react · vite-plugin-singlefile (deploys as one HTML file on Netlify, with every photo inlined).
 
@@ -19,7 +19,7 @@ Netlify picks up `netlify.toml` automatically (build `dist`, SPA fallback, long-
 
 ## Sections on the page
 
-Hero (shop photo + promises) → Services (10 photo cards) → **Before & After** (draggable comparison + treatment notes) → How it works (4 photo steps) → Prices + instant estimator → Gallery (masonry + lightbox) → Reviews → Booking (4 steps → WhatsApp) → FAQ → Footer (hours, address, areas).
+Hero (shop photo + promises) → Services (10 photo cards) → **Before & After** (draggable comparison + treatment notes) → How it works (4 photo steps) → **Prices** (3 photo categories — Men's Wear, Women's Wear, Household & Home Care — every line with its own photo, plus the instant estimator) → Gallery (masonry + lightbox) → Reviews → Booking (4 steps → WhatsApp) → FAQ → Footer (hours, address, areas).
 
 ## Swapping in real photos (zero code changes)
 
@@ -36,6 +36,8 @@ stain-before.png  stain-after.png
 Any of `.webp .avif .jpg .jpeg .png` works (`.webp` wins when a slot has several). Slots without a photo fall back to the bundled SVG illustrations (`src/assets/images/`) via the `<Img>` component — the site never shows a broken image.
 
 Recommended sizes: service tiles ≈ 1100×880, `saree-care` 720×1290 portrait, `shop-front` 1100×600, `owner` 720×720, before/after 900×675, gallery tiles vary (they are cropped by `object-fit`).
+
+The price cards reuse the same photos: each price line points at a slot through `PriceItem.slot` (shirt → `shirt.jpg`, suit → `suit.jpg`, blanket → `blanket.jpg` …), each category has a headline photo (`PriceCategory.slot`) plus a 3-tile strip (`PriceCategory.gallery`). Replace a file in `images/` and the price section updates with it — no code change.
 
 ### Before / after photos
 
@@ -66,7 +68,15 @@ npm run optimize-images && npm run build
 
 ## Editing prices or services
 
-Edit `PRICE_CATEGORIES` / `SERVICES` in `src/lib/business.ts` only — the price table, estimator, service badges, booking hints, booking-service chips and the footer all read from there. Items with `quote: true` (no numeric `price`, e.g. designer sarees and sherwanis) are automatically quote-only in the estimator and listed as “Ask for Quote” on the price card.
+Edit `PRICE_CATEGORIES` / `SERVICES` in `src/lib/business.ts` only — the price table, estimator, service badges, booking hints, booking-service chips, FAQs and the footer all read from there. Three kinds of price line are supported:
+
+| Field | Renders as | Estimator |
+| --- | --- | --- |
+| `price: 50, unit: "per piece"` | `₹50 per piece` | totals at ₹50 |
+| `from: 150, unit: "per piece"` | `from ₹150 per piece` (the “starting ₹…” lines) | totals at the starting rate |
+| `quote: true` | `Ask for Quote` | added to the ticket as a quote line, not totalled |
+
+The current card mirrors the printed rate list at the counter: **Men's Wear** (shirt ₹50, t-shirt ₹50, pant/trouser ₹50, pant + shirt ₹60, suit 2pc ₹150, sherwani ₹200), **Women's Wear** (saree from ₹150, silk saree from ₹250, lehenga from ₹250, kurtis from ₹120, salwar suit from ₹180, chiffon & georgette ₹200, embroidered wear ₹200, designer dress from ₹250, dupatta from ₹80, blouse from ₹100) and **Household & Home Care** (blanket ₹250, quilt/razai ₹250, curtain per panel — quote, carpet cleaning — quote). `SERVICES[*].from` feeds the “₹x+” badges on the service cards, so keep the two in sync.
 
 ## Deployment notes
 

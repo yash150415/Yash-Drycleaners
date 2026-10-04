@@ -34,8 +34,12 @@ export function Services() {
               <div className="flex flex-1 flex-col p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-display text-xl leading-tight text-ink">{service.title}</h3>
-                  <span className="shrink-0 rounded-full bg-teal/12 px-2.5 py-1 text-[11.5px] font-semibold text-teal-deep">
-                    ₹{service.from}+
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11.5px] font-semibold ${
+                      service.from != null ? "bg-teal/12 text-teal-deep" : "bg-gold/15 text-ink"
+                    }`}
+                  >
+                    {service.from != null ? `₹${service.from}+` : "Ask for Quote"}
                   </span>
                 </div>
 
